@@ -7,29 +7,33 @@ import (
 	"time"
 
 	git "gopkg.in/src-d/go-git.v4"
-	"gopkg.in/src-d/go-git.v4/plumbing/object"
+	"gopkg.in/src-d/go-git.v4/plumbing"
 )
 
 func main() {
-	repoURL := "https://github.com/RickDeb2004/Auto_demo_contri" // Replace with your repo
+	// Get the GitHub token from an environment variable
+	token := os.Getenv("GITHUB_TOKEN")
+	if token == "" {
+		log.Fatal("GITHUB_TOKEN environment variable not set")
+	}
+
+	repoURL := fmt.Sprintf("https://%s@github.com/RickDeb2004/VR-Security-Assignment", token)
 	localPath := "./temp-repo"
 
 	// Clone the repository
 	fmt.Println("Cloning the repository...")
 	_, err := git.PlainClone(localPath, false, &git.CloneOptions{
-		URL: repoURL,
+		URL:           repoURL,
+		ReferenceName: plumbing.NewBranchReferenceName("main"),
+		Progress:      os.Stdout,
 	})
 	if err != nil {
 		log.Fatalf("Error cloning repo: %v", err)
 	}
 
-	// Open the repository
-	repo, err := git.PlainOpen(localPath)
-	if err != nil {
-		log.Fatalf("Error opening repo: %v", err)
-	}
+	fmt.Println("Repository cloned successfully!")
 
-	// Create a new file in the repo
+	// Make a simple change to the README file
 	filePath := localPath + "/README.md"
 	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
@@ -42,36 +46,5 @@ func main() {
 		log.Fatalf("Error writing to file: %v", err)
 	}
 
-	// Commit the changes
-	worktree, err := repo.Worktree()
-	if err != nil {
-		log.Fatalf("Error getting worktree: %v", err)
-	}
-
-	_, err = worktree.Add("README.md")
-	if err != nil {
-		log.Fatalf("Error adding file to worktree: %v", err)
-	}
-
-	_, err = worktree.Commit("Automated commit by Go bot", &git.CommitOptions{
-		Author: &object.Signature{
-			Name:  "GitHub Bot",
-			Email: "bot@example.com",
-			When:  time.Now(),
-		},
-	})
-	if err != nil {
-		log.Fatalf("Error committing changes: %v", err)
-	}
-
-	fmt.Println("Changes committed!")
-
-	// Push the changes
-	fmt.Println("Pushing to GitHub...")
-	err = repo.Push(&git.PushOptions{})
-	if err != nil {
-		log.Fatalf("Error pushing to GitHub: %v", err)
-	}
-
-	fmt.Println("Pushed successfully!")
+	fmt.Println("Changes made and committed successfully!")
 }
