@@ -11,7 +11,6 @@ import (
 )
 
 func main() {
-	// Get the GitHub token from an environment variable
 	token := os.Getenv("GITHUB_TOKEN")
 	if token == "" {
 		log.Fatal("GITHUB_TOKEN environment variable not set")
@@ -20,18 +19,40 @@ func main() {
 	repoURL := fmt.Sprintf("https://%s@github.com/RickDeb2004/VR-Security-Assignment", token)
 	localPath := "./temp-repo"
 
-	// Clone the repository
-	fmt.Println("Cloning the repository...")
-	_, err := git.PlainClone(localPath, false, &git.CloneOptions{
-		URL:           repoURL,
-		ReferenceName: plumbing.NewBranchReferenceName("main"),
-		Progress:      os.Stdout,
-	})
-	if err != nil {
-		log.Fatalf("Error cloning repo: %v", err)
-	}
+	// Check if the directory already exists
+	if _, err := os.Stat(localPath); !os.IsNotExist(err) {
+		fmt.Println("Repository already cloned. Pulling latest changes...")
+		repo, err := git.PlainOpen(localPath)
+		if err != nil {
+			log.Fatalf("Error opening repo: %v", err)
+		}
 
-	fmt.Println("Repository cloned successfully!")
+		// Pull the latest changes
+		worktree, err := repo.Worktree()
+		if err != nil {
+			log.Fatalf("Error getting worktree: %v", err)
+		}
+
+		err = worktree.Pull(&git.PullOptions{RemoteName: "origin"})
+		if err != nil && err != git.NoErrAlreadyUpToDate {
+			log.Fatalf("Error pulling changes: %v", err)
+		}
+
+		fmt.Println("Repository updated successfully!")
+	} else {
+		// Clone the repository if it doesn't exist
+		fmt.Println("Cloning the repository...")
+		_, err := git.PlainClone(localPath, false, &git.CloneOptions{
+			URL:           repoURL,
+			ReferenceName: plumbing.NewBranchReferenceName("main"),
+			Progress:      os.Stdout,
+		})
+		if err != nil {
+			log.Fatalf("Error cloning repo: %v", err)
+		}
+
+		fmt.Println("Repository cloned successfully!")
+	}
 
 	// Make a simple change to the README file
 	filePath := localPath + "/README.md"
@@ -46,5 +67,5 @@ func main() {
 		log.Fatalf("Error writing to file: %v", err)
 	}
 
-	fmt.Println("Changes made and committed successfully!")
+	fmt.Println("Changes made successfully!")
 }
