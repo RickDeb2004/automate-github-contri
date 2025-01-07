@@ -8,8 +8,8 @@ import (
 
 	git "gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
-	"gopkg.in/src-d/go-git.v4/plumbing/transport/http"
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
+	"gopkg.in/src-d/go-git.v4/plumbing/transport/http"
 )
 
 func main() {
@@ -24,40 +24,26 @@ func main() {
 	var repo *git.Repository
 	var err error
 
-	// Check if the directory already exists
+	// Remove the directory if it exists to ensure a clean clone
 	if _, err := os.Stat(localPath); !os.IsNotExist(err) {
-		fmt.Println("Repository already cloned. Pulling latest changes...")
-		repo, err = git.PlainOpen(localPath)
+		fmt.Println("Removing existing repository directory...")
+		err = os.RemoveAll(localPath)
 		if err != nil {
-			log.Fatalf("Error opening repo: %v", err)
+			log.Fatalf("Error removing directory: %v", err)
 		}
-
-		// Pull the latest changes
-		worktree, err := repo.Worktree()
-		if err != nil {
-			log.Fatalf("Error getting worktree: %v", err)
-		}
-
-		err = worktree.Pull(&git.PullOptions{RemoteName: "origin"})
-		if err != nil && err != git.NoErrAlreadyUpToDate {
-			log.Fatalf("Error pulling changes: %v", err)
-		}
-
-		fmt.Println("Repository updated successfully!")
-	} else {
-		// Clone the repository if it doesn't exist
-		fmt.Println("Cloning the repository...")
-		repo, err = git.PlainClone(localPath, false, &git.CloneOptions{
-			URL:           repoURL,
-			ReferenceName: plumbing.NewBranchReferenceName("main"),
-			Progress:      os.Stdout,
-		})
-		if err != nil {
-			log.Fatalf("Error cloning repo: %v", err)
-		}
-
-		fmt.Println("Repository cloned successfully!")
 	}
+
+	// Clone the repository
+	fmt.Println("Cloning the repository...")
+	repo, err = git.PlainClone(localPath, false, &git.CloneOptions{
+		URL:           repoURL,
+		ReferenceName: plumbing.NewBranchReferenceName("main"),
+		Progress:      os.Stdout,
+	})
+	if err != nil {
+		log.Fatalf("Error cloning repo: %v", err)
+	}
+	fmt.Println("Repository cloned successfully!")
 
 	// Make a simple change to the README file
 	filePath := localPath + "/README.md"
@@ -71,7 +57,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error writing to file: %v", err)
 	}
-
 	fmt.Println("Changes made successfully!")
 
 	// Commit the changes
@@ -95,7 +80,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error committing changes: %v", err)
 	}
-
 	fmt.Printf("Commit created: %s\n", commit)
 
 	// Push the changes to the remote repository
@@ -111,6 +95,5 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error pushing changes: %v", err)
 	}
-
 	fmt.Println("Changes pushed successfully!")
 }
