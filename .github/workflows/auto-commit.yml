@@ -1,3 +1,28 @@
+# name: Auto Commit Bot
+
+# on:
+#   schedule:
+#     - cron: '0 0 * * *'  # Run every day at midnight
+#   workflow_dispatch:     # Allow manual runs
+
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v3
+
+#       - name: Setup Go
+#         uses: actions/setup-go@v4
+#         with:
+#           go-version: 1.21
+
+#       - name: Run the contribution bot
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#         run: |
+#           go run main.go
 name: Auto Commit Bot
 
 on:
@@ -18,8 +43,10 @@ jobs:
         with:
           go-version: 1.21
 
+      - name: Set up environment variables
+        run: echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
+
       - name: Run the contribution bot
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          go run main.go
+        run: go run main.go
