@@ -56,4 +56,5 @@ jobs:
 
       - name: Run the contribution bot
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: go run main.go
