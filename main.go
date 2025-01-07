@@ -8,6 +8,8 @@ import (
 
 	git "gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
+	"gopkg.in/src-d/go-git.v4/plumbing/transport/http"
+	"gopkg.in/src-d/go-git.v4/plumbing/object"
 )
 
 func main() {
@@ -17,12 +19,15 @@ func main() {
 	}
 
 	repoURL := fmt.Sprintf("https://%s@github.com/RickDeb2004/VR-Security-Assignment", token)
-	localPath := "./temp-repo"
+	localPath := "./temp-repository"
+
+	var repo *git.Repository
+	var err error
 
 	// Check if the directory already exists
 	if _, err := os.Stat(localPath); !os.IsNotExist(err) {
 		fmt.Println("Repository already cloned. Pulling latest changes...")
-		repo, err := git.PlainOpen(localPath)
+		repo, err = git.PlainOpen(localPath)
 		if err != nil {
 			log.Fatalf("Error opening repo: %v", err)
 		}
@@ -42,7 +47,7 @@ func main() {
 	} else {
 		// Clone the repository if it doesn't exist
 		fmt.Println("Cloning the repository...")
-		_, err := git.PlainClone(localPath, false, &git.CloneOptions{
+		repo, err = git.PlainClone(localPath, false, &git.CloneOptions{
 			URL:           repoURL,
 			ReferenceName: plumbing.NewBranchReferenceName("main"),
 			Progress:      os.Stdout,
@@ -68,4 +73,44 @@ func main() {
 	}
 
 	fmt.Println("Changes made successfully!")
+
+	// Commit the changes
+	worktree, err := repo.Worktree()
+	if err != nil {
+		log.Fatalf("Error getting worktree: %v", err)
+	}
+
+	_, err = worktree.Add("README.md")
+	if err != nil {
+		log.Fatalf("Error staging file: %v", err)
+	}
+
+	commit, err := worktree.Commit("Updated README.md with a new contribution", &git.CommitOptions{
+		Author: &object.Signature{
+			Name:  "Debanjan Mukherjee",
+			Email: "debanjanrick04@gmail.com",
+			When:  time.Now(),
+		},
+	})
+	if err != nil {
+		log.Fatalf("Error committing changes: %v", err)
+	}
+
+	fmt.Printf("Commit created: %s\n", commit)
+
+	// Push the changes to the remote repository
+	auth := &http.BasicAuth{
+		Username: "RickDeb2004", // The username can be any non-empty string
+		Password: token,
+	}
+
+	err = repo.Push(&git.PushOptions{
+		RemoteName: "origin",
+		Auth:       auth,
+	})
+	if err != nil {
+		log.Fatalf("Error pushing changes: %v", err)
+	}
+
+	fmt.Println("Changes pushed successfully!")
 }
