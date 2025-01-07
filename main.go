@@ -91,6 +91,7 @@ func main() {
 	err = repo.Push(&git.PushOptions{
 		RemoteName: "origin",
 		Auth:       auth,
+		Progress:   os.Stdout,
 	})
 	if err != nil {
 		log.Fatalf("Error pushing changes: %v", err)
