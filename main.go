@@ -18,7 +18,7 @@ func main() {
 		log.Fatal("GITHUB_TOKEN environment variable not set")
 	}
 
-	repoURL := fmt.Sprintf("https://%s@github.com/RickDeb2004/VR-Security-Assignment", token)
+	repoURL := fmt.Sprintf("https://RickDeb2004:%s@github.com/RickDeb2004/VR-Security-Assignment", token)
 	localPath := "./temp-repository"
 
 	var repo *git.Repository
@@ -72,7 +72,7 @@ func main() {
 
 	commit, err := worktree.Commit("Updated README.md with a new contribution", &git.CommitOptions{
 		Author: &object.Signature{
-			Name:  "Debanjan Mukherjee",
+			Name:  "RickDeb2004",
 			Email: "debanjanrick04@gmail.com",
 			When:  time.Now(),
 		},
