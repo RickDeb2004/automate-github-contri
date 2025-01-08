@@ -1,11 +1,10 @@
-# permissions:
-#   contents: write
+
 # name: Auto Commit Bot
 
 # on:
 #   schedule:
-#     - cron: '0 0 * * *'  # Run every day at midnight
-#   workflow_dispatch:     # Allow manual runs
+#     - cron: "0 0 * * *" # Run every day at midnight
+#   workflow_dispatch: # Allow manual runs
 
 # jobs:
 #   build:
@@ -16,51 +15,48 @@
 #         uses: actions/checkout@v3
 #         with:
 #           fetch-depth: 0
+#           token: ${{ secrets.GITHUB_TOKEN }}
+
+#       - name: Setup Git Config
+#         run: |
+#           git config --global user.name 'github-actions[bot]'
+#           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
 #       - name: Setup Go
 #         uses: actions/setup-go@v4
 #         with:
 #           go-version: 1.21
 
-#       - name: Debug environment variables
-#         run: |
-#           echo "GITHUB_TOKEN: $GITHUB_TOKEN"
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
 #       - name: Run the contribution bot
 #         env:
 #           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 #         run: go run main.go
-name: Auto Commit Bot
+name: Multi-Repository Auto Commit Bot
 
 on:
   schedule:
-    - cron: "0 0 * * *" # Run every day at midnight
-  workflow_dispatch: # Allow manual runs
+    - cron: '0 0 * * *'  # Run every day at midnight
+  workflow_dispatch:      # Allow manual runs
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Setup Git Config
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-
+        
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
           go-version: 1.21
-
-      - name: Run the contribution bot
+      
+      - name: Setup Git Config
+        run: |
+          git config --global user.name 'RickDeb2004'
+          git config --global user.email 'debanjanrick04@gmail.com'
+      
+      - name: Run the multi-repository commit bot
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: go run main.go
